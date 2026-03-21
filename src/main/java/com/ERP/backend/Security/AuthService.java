@@ -1,7 +1,6 @@
 package com.ERP.backend.Security;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
