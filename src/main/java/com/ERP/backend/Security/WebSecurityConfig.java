@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 public class WebSecurityConfig {
 	
 	public final PasswordEncoder passwordEncoder;
+	public final JwtAuthFilter jwtAuthFilter;
 	
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
@@ -23,10 +25,10 @@ public class WebSecurityConfig {
 		.csrf(csrfConfig -> csrfConfig.disable())
 		.sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 		.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/erp/api/purchases/**").hasRole("ADMIN")
 				.requestMatchers("/erp/api/product/**", "/auth/**").permitAll()
-				.requestMatchers("/erp/api/**").authenticated()
-				);
+				.anyRequest().authenticated())
+		.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+		
 		return httpSecurity.build();
 	}
 	
