@@ -15,6 +15,7 @@ public class CustomerResponseDTO {
     private Long id;
     private String name;
     private String phone;
+    private String email;
     private String address;
     private Double creditBalance;
 }
