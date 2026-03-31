@@ -20,10 +20,12 @@ public class WebSecurityConfig {
 	
 	public final PasswordEncoder passwordEncoder;
 	public final JwtAuthFilter jwtAuthFilter;
+	public final OAuth2SuccessHandler oAuth2SuccessHandler;
 	
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
 		httpSecurity
+		.cors(cors -> {})
 		.csrf(csrfConfig -> csrfConfig.disable())
 		.sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 		.authorizeHttpRequests(auth -> auth
@@ -37,7 +39,7 @@ public class WebSecurityConfig {
 				    			}
 				    	)
 				    	
-				    	.successHandler(null)
+				    	.successHandler(oAuth2SuccessHandler)
 				    );
 		
 		return httpSecurity.build();
