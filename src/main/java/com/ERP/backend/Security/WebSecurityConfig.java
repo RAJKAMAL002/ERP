@@ -23,26 +23,28 @@ public class WebSecurityConfig {
 	public final OAuth2SuccessHandler oAuth2SuccessHandler;
 	
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
-		httpSecurity
-		.cors(cors -> {})
-		.csrf(csrfConfig -> csrfConfig.disable())
-		.sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-		.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/erp/api/product/**", "/auth/**").permitAll()
-				.anyRequest().authenticated())
-		.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-		.oauth2Login(oAuth2 -> oAuth2
-				    	.failureHandler(
-				    			(request, response, exception) -> {
-				    				log.error("Oauth2 Error {}", exception);
-				    			}
-				    	)
-				    	
-				    	.successHandler(oAuth2SuccessHandler)
-				    );
-		
-		return httpSecurity.build();
+	public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+	    httpSecurity
+	        .cors(cors -> {})
+	        .csrf(csrfConfig -> csrfConfig.disable())
+	        .sessionManagement(sessionConfig -> 
+	        sessionConfig.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+	        
+	        .authorizeHttpRequests(auth -> auth
+	            .requestMatchers("/erp/api/product/**", "/auth/**").permitAll()
+	            .anyRequest().authenticated()
+	        )
+	        
+	        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+	        
+	        .oauth2Login(oAuth2 -> oAuth2
+	            .failureHandler((request, response, exception) -> {
+	                log.error("Oauth2 Error {}", exception);
+	            })
+	            .successHandler(oAuth2SuccessHandler)
+	        );
+
+	    return httpSecurity.build();
 	}
 	
 	@Bean

@@ -39,8 +39,22 @@ public class JwtAuthFilter extends OncePerRequestFilter{
 			return;
 		}
 		
-		String token = requestHeaderToken.split("Bearer ")[1];
-		String username = authUtil.getUsernameFromToken(token);
+		String token = requestHeaderToken.substring(7);
+		
+	    if (token == null || token.trim().isEmpty() || token.equals("undefined")) {
+	        filterChain.doFilter(request, response);
+	        return;
+	    }
+		
+	    String username = null;
+	    
+	    try {
+	        username = authUtil.getUsernameFromToken(token);
+	    } catch (Exception e) {
+	        log.error("Invalid JWT Token: {}", token);
+	        filterChain.doFilter(request, response);
+	        return;
+	    }
 		
 		if(username == null || SecurityContextHolder.getContext().getAuthentication() == null) {
 			Users user = userRepo.findByUsername(username).orElseThrow();

@@ -5,8 +5,12 @@ import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.ERP.backend.Constants.AuthProviderType;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -32,8 +36,13 @@ public class Users implements UserDetails{
 	@Column(nullable=false, unique=true)
 	private String username;
 	
-	@Column(nullable=false)
+	@Column(nullable=true)
 	private String password;
+	
+	private String providerId;
+	
+	@Enumerated(EnumType.STRING)
+	private AuthProviderType providerType;
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -15,7 +15,7 @@ import com.ERP.backend.Service.PurchaseService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("erp/api/purchases")
+@RequestMapping("/purchases")
 @RequiredArgsConstructor
 public class PurchaseController {
 

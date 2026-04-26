@@ -13,4 +13,4 @@ public class LoginResponseDTO {
 	
 	String jwt;
 	String username;
-}
+} 
