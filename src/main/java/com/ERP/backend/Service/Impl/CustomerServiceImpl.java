@@ -58,44 +58,52 @@ public class CustomerServiceImpl implements CustomerService{
 
 	@Override
 	public CustomerResponseDTO getCustomerById(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+		Customer customer = customerRepo.findById(id).orElseThrow(() -> new RuntimeException("Customer not found"));
+		return modelMapper.map(customer, CustomerResponseDTO.class);
 	}
 
 	@Override
 	public List<CustomerResponseDTO> getAllCustomers() {
-		// TODO Auto-generated method stub
-		return null;
+		return customerRepo.findAll()
+				.stream()
+				.map(c -> modelMapper.map(c, CustomerResponseDTO.class))
+				.toList();
 	}
 
 	@Override
 	public void deleteCustomer(Long id) {
-		// TODO Auto-generated method stub
-		
+		Customer customer = customerRepo.findById(id).orElseThrow(() -> new RuntimeException("Customer not found"));
+		customerRepo.delete(customer);
 	}
 
 	@Override
+	@Transactional
 	public void addCredit(Long customerId, Double amount) {
-		// TODO Auto-generated method stub
-		
+		if (amount == null || amount <= 0) throw new IllegalArgumentException("Amount must be greater than 0");
+		Customer customer = customerRepo.findById(customerId).orElseThrow(() -> new RuntimeException("Customer not found"));
+		customer.setCreditBalance(customer.getCreditBalance() + amount.intValue());
 	}
 
 	@Override
+	@Transactional
 	public void reduceCredit(Long customerId, Double amount) {
-		// TODO Auto-generated method stub
-		
+		if (amount == null || amount <= 0) throw new IllegalArgumentException("Amount must be greater than 0");
+		Customer customer = customerRepo.findById(customerId).orElseThrow(() -> new RuntimeException("Customer not found"));
+		int updated = customer.getCreditBalance() - amount.intValue();
+		if (updated < 0) throw new IllegalArgumentException("Credit balance cannot be less than zero");
+		customer.setCreditBalance(updated);
 	}
 
 	@Override
 	public Double getCustomerCredit(Long customerId) {
-		// TODO Auto-generated method stub
-		return null;
+		Customer customer = customerRepo.findById(customerId).orElseThrow(() -> new RuntimeException("Customer not found"));
+		return (double) customer.getCreditBalance();
 	}
 
 	@Override
 	public Double getTotalPurchaseAmount(Long customerId) {
-		// TODO Auto-generated method stub
-		return null;
+		customerRepo.findById(customerId).orElseThrow(() -> new RuntimeException("Customer not found"));
+		return 0.0;
 	}
 
 }

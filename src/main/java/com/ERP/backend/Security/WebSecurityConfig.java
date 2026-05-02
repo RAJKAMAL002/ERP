@@ -35,14 +35,14 @@ public class WebSecurityConfig {
 	            .anyRequest().authenticated()
 	        )
 	        
-	        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+	        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 	        
-	        .oauth2Login(oAuth2 -> oAuth2
-	            .failureHandler((request, response, exception) -> {
-	                log.error("Oauth2 Error {}", exception);
-	            })
-	            .successHandler(oAuth2SuccessHandler)
-	        );
+//	        .oauth2Login(oAuth2 -> oAuth2
+//	            .failureHandler((request, response, exception) -> {
+//	                log.error("Oauth2 Error {}", exception);
+//	            })
+//	            .successHandler(oAuth2SuccessHandler)
+//	        );
 
 	    return httpSecurity.build();
 	}
