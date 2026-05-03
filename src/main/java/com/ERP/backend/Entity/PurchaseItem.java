@@ -30,7 +30,7 @@ public class PurchaseItem {
 	@ManyToOne
 	private Purchase purchase;
 	
-	@OneToOne(optional = false)
+	@ManyToOne(optional = false)
 	private Product product;
 	
 	@Column(nullable = false)

@@ -2,20 +2,22 @@ package com.ERP.backend.Service.Impl;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.ERP.backend.DTO.SaleRequestDTO;
 import com.ERP.backend.DTO.SaleResponseDTO;
 import com.ERP.backend.Entity.Customer;
 import com.ERP.backend.Entity.Sale;
+import com.ERP.backend.Entity.SaleItem;
 import com.ERP.backend.Repository.CustomerRepo;
 import com.ERP.backend.Repository.SaleRepo;
 import com.ERP.backend.Service.SaleService;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -24,7 +26,28 @@ public class SaleServiceImpl implements SaleService {
 
     private final SaleRepo saleRepo;
     private final CustomerRepo customerRepo;
-    private final ModelMapper modelMapper;
+
+    /**
+     * ModelMapper cannot map {@code List<SaleItem>} to {@code List<Long>} on {@link SaleResponseDTO#items};
+     * build the DTO explicitly.
+     */
+    private static SaleResponseDTO toDto(Sale sale) {
+        SaleResponseDTO dto = new SaleResponseDTO();
+        dto.setId(sale.getId());
+        dto.setCustomerId(sale.getCustomer() != null ? sale.getCustomer().getId() : null);
+        dto.setSaleDate(sale.getSaleDate());
+        dto.setTotalAmount(sale.getTotalAmount());
+        dto.setPaymentMode(sale.getPaymentMode());
+        if (sale.getSaleItems() == null || sale.getSaleItems().isEmpty()) {
+            dto.setItems(Collections.emptyList());
+        } else {
+            dto.setItems(sale.getSaleItems().stream()
+                    .map(SaleItem::getId)
+                    .filter(Objects::nonNull)
+                    .toList());
+        }
+        return dto;
+    }
 
     @Override
     @Transactional
@@ -40,45 +63,23 @@ public class SaleServiceImpl implements SaleService {
 
         Sale savedSale = saleRepo.save(sale);
 
-        return modelMapper.map(savedSale, SaleResponseDTO.class);
+        return toDto(savedSale);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public SaleResponseDTO getSaleById(Long id) {
 
         Sale sale = saleRepo.findById(id).orElseThrow(() -> new RuntimeException("Sale not found"));
 
-        SaleResponseDTO dto = modelMapper.map(sale, SaleResponseDTO.class);
-
-        List<Long> itemIds = sale.getSaleItems()
-                .stream()
-                .map(item -> item.getId())
-                .toList();
-
-        dto.setItems(itemIds);
-
-        return dto;
+        return toDto(sale);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<SaleResponseDTO> getAllSales() {
 
-        return saleRepo.findAll()
-                .stream()
-                .map(sale -> {
-
-                    SaleResponseDTO dto = modelMapper.map(sale, SaleResponseDTO.class);
-
-                    List<Long> itemIds = sale.getSaleItems()
-                            .stream()
-                            .map(item -> item.getId())
-                            .toList();
-
-                    dto.setItems(itemIds);
-
-                    return dto;
-
-                }).toList();
+        return saleRepo.findAll().stream().map(SaleServiceImpl::toDto).toList();
     }
 
     @Override

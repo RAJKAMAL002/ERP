@@ -8,13 +8,13 @@ import org.springframework.stereotype.Service;
 import com.ERP.backend.DTO.PurchaseResponseDTO;
 import com.ERP.backend.DTO.SupplierRequestDTO;
 import com.ERP.backend.DTO.SupplierResponseDTO;
-import com.ERP.backend.Entity.Purchase;
 import com.ERP.backend.Entity.Supplier;
+import com.ERP.backend.mapper.PurchaseResponseMapper;
 import com.ERP.backend.Repository.PurchaseRepo;
 import com.ERP.backend.Repository.SupplierRepo;
 import com.ERP.backend.Service.SupplierService;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -63,10 +63,10 @@ public class SupplierServiceImpl implements SupplierService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<PurchaseResponseDTO> getSupplierPurchases(Long supplierId) {
-		List<Purchase> purchases = purchaseRepo.findBySupplierId(supplierId);
-		return purchases.stream()
-		        .map((supplier) -> modelMapper.map(supplier, PurchaseResponseDTO.class))
+		return purchaseRepo.findBySupplierId(supplierId).stream()
+		        .map(PurchaseResponseMapper::fromEntity)
 		        .toList();
 	}
 

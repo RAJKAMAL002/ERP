@@ -59,6 +59,7 @@ public class PurchaseItemServiceImpl implements PurchaseItemService{
 	    purchaseItem = purchaseItemRepo.save(purchaseItem);
 
 	    // Increase stock
+	    if(quantity > product.getMaxStockLevel()) throw new RuntimeException("Quantity exceeding max limit");
 	    productService.increaseStock(product.getId(), quantity);
 
 	    // Update purchase total
