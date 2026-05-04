@@ -44,6 +44,11 @@ public class ProductController {
 		return ResponseEntity.ok(productService.getLowStockProducts());
 	}
 	
+	@GetMapping("/total-inventory")
+	public ResponseEntity<Integer> fetchTotalInventory(){
+		return ResponseEntity.ok(productService.getInventory());
+	}
+	
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteProductById(@PathVariable("id") Long id){
 		productService.deleteProduct(id);

@@ -108,4 +108,9 @@ public class ProductServiceImpl implements ProductService{
 		product.setInventory(quantity);
 	}
 
+	@Override
+	public Integer getInventory() {
+		return productRepo.getTotalInventory();
+	}
+
 }

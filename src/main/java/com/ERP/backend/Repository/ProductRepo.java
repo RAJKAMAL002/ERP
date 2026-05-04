@@ -13,4 +13,7 @@ public interface ProductRepo extends JpaRepository<Product, Long>{
 	
 	@Query("select p from Product p where p.inventory < p.minStockLevel")
 	List<Product> findLowInventoryProduct();
+	
+	@Query("SELECT COALESCE(SUM(p.inventory * p.purchasePrice), 0) FROM Product p")
+	Integer getTotalInventory();
 }

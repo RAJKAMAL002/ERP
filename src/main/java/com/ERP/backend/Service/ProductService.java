@@ -12,6 +12,7 @@ public interface ProductService {
     ProductResponseDTO getProductById(Long id);
     List<ProductResponseDTO> getAllProducts();
     void deleteProduct(Long id);
+    Integer getInventory();
 
     // Stock Management
     void increaseStock(Long productId, Integer quantity);
