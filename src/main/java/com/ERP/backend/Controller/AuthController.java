@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ERP.backend.DTO.LoginRequestDTO;
 import com.ERP.backend.DTO.LoginResponseDTO;
+import com.ERP.backend.DTO.SignUpRequestDTO;
 import com.ERP.backend.DTO.signupResponseDTO;
 import com.ERP.backend.Security.AuthService;
 
@@ -24,7 +25,7 @@ public class AuthController {
     }
     
     @PostMapping("/signup")
-    public ResponseEntity<signupResponseDTO> signup(@RequestBody LoginRequestDTO signupRequestDTO) {
+    public ResponseEntity<signupResponseDTO> signup(@RequestBody SignUpRequestDTO signupRequestDTO) {
         signupResponseDTO response = authService.signup(signupRequestDTO, null, null);
         return ResponseEntity.ok(response);
     }

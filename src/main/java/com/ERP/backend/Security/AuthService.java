@@ -3,6 +3,10 @@ package com.ERP.backend.Security;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+
+import java.time.LocalDate;
+import java.util.Set;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -10,10 +14,14 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.stereotype.Service;
 
 import com.ERP.backend.Constants.AuthProviderType;
+import com.ERP.backend.Constants.RoleType;
 import com.ERP.backend.DTO.LoginRequestDTO;
 import com.ERP.backend.DTO.LoginResponseDTO;
+import com.ERP.backend.DTO.SignUpRequestDTO;
 import com.ERP.backend.DTO.signupResponseDTO;
 import com.ERP.backend.Entity.Users;
+import com.ERP.backend.Entity.Employee;
+import com.ERP.backend.Repository.EmployeeRepo;
 import com.ERP.backend.Repository.UserRepository;
 
 import jakarta.transaction.Transactional;
@@ -28,6 +36,7 @@ public class AuthService {
 	private final AuthUtil authUtil;
 	private final ModelMapper modelMapper;
 	private final PasswordEncoder passwordEncoder;
+	private final EmployeeRepo employeeRepo;
 	
 	public LoginResponseDTO login(LoginRequestDTO loginRequestDTO){
         Authentication authentication = config.getAuthenticationManager().authenticate(
@@ -43,21 +52,35 @@ public class AuthService {
 		return new LoginResponseDTO(token, user.getUsername());
 	}
 	
-	public Users signUpInternal(LoginRequestDTO signupRequestDTO, AuthProviderType authProviderType, String providerId) {
+	public Users signUpInternal(SignUpRequestDTO signupRequestDTO, AuthProviderType authProviderType, String providerId) {
 		Users user = userRepo.findByUsername(signupRequestDTO.getUsername()).orElse(null);
 		if(user != null) throw new IllegalArgumentException("Username already exists");
 		user =  Users.builder()
 				.username(signupRequestDTO.getUsername())
 				.providerId(providerId)
 				.providerType(authProviderType)
+				.roles(Set.of(RoleType.Employee))
 				.build();
 		
-			user.setPassword(passwordEncoder.encode(signupRequestDTO.getPassword()));
+		user.setPassword(passwordEncoder.encode(signupRequestDTO.getPassword()));
 		
-		return userRepo.save(user);
+		user = userRepo.save(user);
+		
+		String date = LocalDate.now().toString();
+			
+		Employee employee = Employee.builder()
+					.name(signupRequestDTO.getName())
+					.email(signupRequestDTO.getUsername())
+					.users(user)
+					.joiningDate(date)
+					.build();
+		
+	    employeeRepo.save(employee);
+		
+		return user;
 	}
 
-	public signupResponseDTO signup(LoginRequestDTO signupRequestDTO, AuthProviderType authProviderType, String providerId) {
+	public signupResponseDTO signup(SignUpRequestDTO signupRequestDTO, AuthProviderType authProviderType, String providerId) {
 		Users user = signUpInternal(signupRequestDTO, authProviderType, providerId);
 		return new signupResponseDTO(user.getId(), user.getUsername());
 	}
@@ -68,6 +91,7 @@ public class AuthService {
 	    AuthProviderType authProviderType = authUtil.getProviderTypeFromRegistrationId(registrationId);
 	    String providerId = authUtil.determineProviderIdFromOAuth2User(oAuth2User, registrationId);
 	    String email = oAuth2User.getAttribute("email");
+	    String name = oAuth2User.getAttribute("name");
 
 	    Users user = userRepo.findByProviderIdAndProviderType(providerId, authProviderType).orElse(null);
 
@@ -82,7 +106,7 @@ public class AuthService {
 	        } else {
 	            // ✅ New user signup
 	            String username = authUtil.determineUsernameFromOAuth2User(oAuth2User, registrationId, providerId);
-	            user = signUpInternal(new LoginRequestDTO(username, null), authProviderType, providerId);
+	            user = signUpInternal(new SignUpRequestDTO(username, null, name), authProviderType, providerId);
 
 	            user.setProviderId(providerId);
 	            user.setProviderType(authProviderType);

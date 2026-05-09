@@ -1,16 +1,21 @@
 package com.ERP.backend.Entity;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.ERP.backend.Constants.AuthProviderType;
+import com.ERP.backend.Constants.RoleType;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -43,6 +48,10 @@ public class Users implements UserDetails{
 	
 	@Enumerated(EnumType.STRING)
 	private AuthProviderType providerType;
+	
+	@ElementCollection(fetch = FetchType.EAGER) // “Store this collection in a separate table, but the items are not full entities.”
+	@Enumerated(EnumType.STRING)
+	Set<RoleType> roles = new HashSet<>();
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
